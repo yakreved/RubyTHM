@@ -97,6 +97,6 @@ class Network
 
   def PatternMap(data)
     overlap data
-    ingibit
+    ingibit.map { |e| e.__id__ }
   end
 end
