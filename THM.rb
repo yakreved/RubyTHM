@@ -7,15 +7,28 @@ class Network
   def initialize
     @minOverlap = 5
     @neurons_in_column = 5
-    @columns = Array.new(10){Column.new}
+    @columns = Array.new(20){Column.new}
     @desiredLocalActivity = 3          #Параметр контролирующий число колонок победителей после шага подавления. 
 
   end
   
   #Присоединяем синапсы к входным данным (Раз и навсегда)
   def connectNetworkToInputs(size)
+    bindList = Array.new(0)
+    @columns.each do |c|
+      c.neurons.each do |n|
+        p c if n==nil
+        bindList.push(n.synapse) if n!=nil
+      end
+    end
+
+    if(size>bindList.length)
+      throw "u have not enough neurons for input data"
+    end
     for i in 0 .. size -1 do
-      @columns.sample.neurons.sample.synapse.input_source = i
+      curr = bindList.sample
+      curr.input_source = i
+      bindList.delete(curr)
     end
   end
   
@@ -80,5 +93,10 @@ class Network
     overlap(input)
     learn(ingibit)
     
+  end
+
+  def PatternMap(data)
+    overlap data
+    ingibit
   end
 end
