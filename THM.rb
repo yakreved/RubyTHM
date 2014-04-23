@@ -2,9 +2,10 @@ require './Column'
 
 class Network
   
-  attr_accessor :columns, :neurons_in_column,:connectedPerm,:desiredLocalActivity, :minOverlap
+  attr_accessor :columns, :neurons_in_column,:connectedPerm,:desiredLocalActivity, :minOverlap, :ingibit_radius
 
   def initialize
+    @ingibit_radius = 10
     @minOverlap = 5
     @neurons_in_column = 5
     @columns = Array.new(20){Column.new}
@@ -26,13 +27,8 @@ class Network
       end
     end
 
-    if(size>bindList.length)
-      throw "u have not enough neurons for input data"
-    end
-    for i in 0 .. size -1 do
-      curr = bindList.sample
-      curr.input_source = i
-      bindList.delete(curr)
+    bindList.each do |s|
+      s.input_source = rand(size)
     end
   end
   
@@ -40,12 +36,13 @@ class Network
   def spaceGrouper(input)
     #1.Overlap
     def overlap(input)
+      minOverlap = @columns[0].neurons.length/2
       @columns.each do |c|
         c.overlap = 0
         c.connectedSynapses.each do |s|
-          c.overlap = c.overlap + input[s.input_source]
+          c.overlap = c.overlap + input[s.input_source] if input[s.input_source] !=nil
         end
-        if c.overlap < 1  then c.overlap =0 #5 = minOverlap
+        if c.overlap < minOverlap  then c.overlap =0 #5 = minOverlap
         else
           c.overlap= c.overlap*c.boost
         end
@@ -75,7 +72,7 @@ class Network
     
     #Список колонок находящихся в радиусе подавления inhibitionRadius колонки c. 
     def neighbors(c)
-      @columns.slice(@columns.index(c)-10,@columns.index(c)+10)
+      @columns.slice(@columns.index(c)-@ingibit_radius,@columns.index(c)+@ingibit_radius)
     end
     
     #Фаза 3: Обучение
