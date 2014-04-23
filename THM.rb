@@ -11,9 +11,13 @@ class Network
     @desiredLocalActivity = 3          #Параметр контролирующий число колонок победителей после шага подавления. 
 
   end
+
+  def setColumnsCount(c)
+    @columns = Array.new(c){Column.new}
+  end
   
   #Присоединяем синапсы к входным данным (Раз и навсегда)
-  def connectNetworkToInputs(size)
+  def connectNetworkToInputs(size) #переделать до наоборот
     bindList = Array.new(0)
     @columns.each do |c|
       c.neurons.each do |n|

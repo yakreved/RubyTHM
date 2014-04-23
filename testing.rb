@@ -1,5 +1,6 @@
 require './THM'
 require './Column'
+require 'chunky_png'
 
 #Testing
 def testFunc1
@@ -32,8 +33,20 @@ def testFunc1
   
 end
 
-def sinusTesting
-  
+def imageTest
+  image = ChunkyPNG::Image.from_file('C:\max_ep.png')
+  tmp = Array.new(0)
+  image.height.times do |y|
+    image.row(y).each_with_index do |pixel, x|
+      tmp.push( ChunkyPNG::Color.to_hex(pixel) > "#666666" ? 1:0)
+    end
+  end
+  p tmp
+  n = Network.new
+  n.setColumnsCount(tmp.length+2)
+  n.connectNetworkToInputs(tmp.length)
+  n.spaceGrouper(tmp)
+  p n.PatternMap(tmp)
 end
-testFunc1
-
+#testFunc1
+imageTest
