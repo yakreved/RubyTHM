@@ -2,13 +2,14 @@ require './Neuron'
 
 class Column
   
-    attr_accessor :overlap,:neurons, :boost
+    attr_accessor :overlap,:neurons, :boost, :predicted
     
     def initialize
       @neurons = Array.new(5){Neuron.new}
       @overlap = 0
       @boost = 1
-      @connectedPerm = 0.5  #пороговое значение – минимальное значение перманентности при котором синапс считается «действующим» («подключенным»)
+      @connectedPerm = 0.6  #пороговое значение – минимальное значение перманентности при котором синапс считается «действующим» («подключенным»)
+      @predicted = false
     end
     
     def connectedSynapses

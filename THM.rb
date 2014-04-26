@@ -7,7 +7,7 @@ class Network
   def initialize
     @ingibit_radius = 10
     @minOverlap = 5
-    @neurons_in_column = 5
+    @neurons_in_column = 2
     @columns = Array.new(20){Column.new}
     @desiredLocalActivity = 3          #Параметр контролирующий число колонок победителей после шага подавления. 
 
@@ -94,6 +94,12 @@ class Network
     overlap(input)
     learn(ingibit)
     
+  end
+  
+  def temporalGrouper(activeColumns)
+    def Faza1(activeColumns)
+      :predicted = false
+    end
   end
 
   def PatternMap(data)
