@@ -52,8 +52,9 @@ class Network
     #2.Ингибирование (подавление)
     def ingibit
       activeColumns = []
-      @columns.each do |c|
-        minLocalActivity = kthScore(neighbors(c), @desiredLocalActivity)
+      @columns.each_with_index do |c,i|
+        #minLocalActivity = kthScore(neighbors(c), @desiredLocalActivity) #уй бы с ним пока, а может и ваще
+        minLocalActivity =findMinLocalActivity(i)
         if c.overlap>0 and c.overlap>= minLocalActivity
           activeColumns.push(c)
         end
@@ -61,30 +62,48 @@ class Network
       activeColumns
     end
     
+    #Хитровыебаный поиск максимума вместо соседей и kthScore: победитель в секторе будет только один, разреженность регулировать через @ingibit_radius
+    @MinLocalActCached =-234
+    def findMinLocalActivity(index_of_column)
+      if index_of_column == 0 or @columns[index_of_column -1].overlap == @MinLocalActCached
+        @MinLocalActCached =@columns.slice(0, @ingibit_radius).max{|a,b| a.overlap <=> b.overlap}.overlap
+        return @MinLocalActCached
+      else
+        if @columns[index_of_column -1].overlap < @MinLocalActCached and ((@columns[index_of_column + @ingibit_radius] !=nil ? @columns[index_of_column + @ingibit_radius].overlap : -234) < @MinLocalActCached)
+          return @MinLocalActCached
+        end
+        if ((@columns[index_of_column + @ingibit_radius] !=nil ? @columns[index_of_column + @ingibit_radius].overlap : -234) >= @MinLocalActCached)
+          @MinLocalActCached = @columns[index_of_column + @ingibit_radius].overlap
+          return @MinLocalActCached
+        end
+      end
+      @MinLocalActCached
+    end
+    
     #Для заданного списка колонок возвращает их k-ое максимальное значение их перекрытий со входом. 
     def kthScore(colls,desiredLocalActivity)
       if colls.length> desiredLocalActivity
         colls.sort_by{|p| p.overlap}[desiredLocalActivity].overlap
       else
-        colls.last.overlap
+        colls.sort_by{|p| p.overlap}.last.overlap
       end
     end
     
     #Список колонок находящихся в радиусе подавления inhibitionRadius колонки c. 
-    def neighbors(c)
-      @columns.slice(@columns.index(c)-@ingibit_radius,@columns.index(c)+@ingibit_radius)
+    def neighbors(index_of_c)
+      @columns.slice(index_of_c-@ingibit_radius,index_of_c+@ingibit_radius)
     end
     
     #Фаза 3: Обучение
     def learn(activeColumns)
       activeColumns.each do |c|
         c.connectedSynapses.each do |s|
-          s.permanence+= 0.1#permanenceInc
+          s.permanence+= 0.05#permanenceInc
           s.permanence = [1, s.permanence].min
         end
         
         c.connectedSynapses.each do |s|
-          s.permanence -= 0.1#permanenceDec
+          s.permanence -= 0.05#permanenceDec
           s.permanence =  [0, s.permanence].max
         end
         #Здесь возможно будет заимплементено ускорение
@@ -98,7 +117,11 @@ class Network
   
   def temporalGrouper(activeColumns)
     def Faza1(activeColumns)
-      :predicted = false
+      activeColumns.each do |c|
+        predicted = false
+        
+      end
+      
     end
   end
 

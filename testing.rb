@@ -1,6 +1,7 @@
 require './THM'
 require './Column'
 require 'chunky_png'
+require 'ruby-prof'
 
 #Testing
 def testFunc1
@@ -59,15 +60,14 @@ def imageTest
   p "end converting images"
 
   n = Network.new
-  n.setColumnsCount(1000)
-  n.ingibit_radius = 100
+  n.setColumnsCount(10_000)
+  n.ingibit_radius = 10
   n.connectNetworkToInputs(tmp.length)
 
   p "learning"
-  for i in 0..10
-    if i%10==0
-      p i
-    end
+  #RubyProf.start
+  for i in 0..20
+    p "step "+i.to_s
     n.spaceGrouper(tmp)
     n.spaceGrouper(tmp2)
     n.spaceGrouper(cat3)
@@ -76,26 +76,59 @@ def imageTest
     n.spaceGrouper(tmp4)
     n.spaceGrouper(human3)
     n.spaceGrouper(human4)
+    n.spaceGrouper(flower1)
+    n.spaceGrouper(flower2)
   end
+  #result = RubyProf.stop
+  #printer = RubyProf::FlatPrinterWithLineNumbers.new(result)
+  #printer.print(STDOUT)
   p "end learn"
+  
+  #h = Hash.new
+  #h["cat_1 & cat_2 "] = (n.PatternMap(tmp) & n.PatternMap(tmp2)).length
+  #h["cat_1 & cat_3 "] = (n.PatternMap(tmp) & n.PatternMap(cat3)).length
+  #h["cat_2 & cat_3 "] = (n.PatternMap(tmp2) & n.PatternMap(cat3)).length
+  #h["cat_4 & cat_3 "] = (n.PatternMap(cat4) & n.PatternMap(cat3)).length
+  #h["cat_1 & human_1 "] = (n.PatternMap(tmp) & n.PatternMap(tmp3)).length
+  #h["cat_2 & human_1 "] = (n.PatternMap(tmp2) & n.PatternMap(tmp3)).length
+  #h["human_1 & human_2 "] = (n.PatternMap(tmp4) & n.PatternMap(tmp3)).length
+  #h["human_2 & human_3 "] = (n.PatternMap(tmp4) & n.PatternMap(human3)).length
+  #h["human_1 & human_3 "] = (n.PatternMap(tmp3) & n.PatternMap(human3)).length
+  #h["cat_2 & human_2 "] = (n.PatternMap(tmp2) & n.PatternMap(tmp4)).length
+  #h["cat_4 & human_4 "] = (n.PatternMap(cat4) & n.PatternMap(human4)).length 
+  #h["cat_4 & flower1 "] = (n.PatternMap(cat4) & n.PatternMap(flower1)).length 
+  #h["cat_3 & flower1 "] = (n.PatternMap(cat4) & n.PatternMap(flower1)).length 
+  #h["human_2 & flower1 "] = (n.PatternMap(tmp4) & n.PatternMap(flower1)).length
+  #h["flower2 & flower1 "] = (n.PatternMap(flower2) & n.PatternMap(flower1)).length    
+  #h=h.sort_by{|k,v| -v} 
+  #h.each{|k,v| p k+v.to_s}
+
 
   h = Hash.new
-  h["cat_1 & cat_2 "] = (n.PatternMap(tmp) & n.PatternMap(tmp2)).length
-  h["cat_1 & cat_3 "] = (n.PatternMap(tmp) & n.PatternMap(cat3)).length
-  h["cat_2 & cat_3 "] = (n.PatternMap(tmp2) & n.PatternMap(cat3)).length
-  h["cat_4 & cat_3 "] = (n.PatternMap(cat4) & n.PatternMap(cat3)).length
-  h["cat_1 & human_1 "] = (n.PatternMap(tmp) & n.PatternMap(tmp3)).length
-  h["cat_2 & human_1 "] = (n.PatternMap(tmp2) & n.PatternMap(tmp3)).length
-  h["human_1 & human_2 "] = (n.PatternMap(tmp4) & n.PatternMap(tmp3)).length
-  h["human_2 & human_3 "] = (n.PatternMap(tmp4) & n.PatternMap(human3)).length
-  h["cat_2 & human_2 "] = (n.PatternMap(tmp2) & n.PatternMap(tmp4)).length
-  h["cat_4 & human_4 "] = (n.PatternMap(cat4) & n.PatternMap(human4)).length 
-  h["cat_4 & flower1 "] = (n.PatternMap(cat4) & n.PatternMap(flower1)).length 
-  h["cat_3 & flower1 "] = (n.PatternMap(cat4) & n.PatternMap(flower1)).length 
-  h["human_2 & flower1 "] = (n.PatternMap(tmp4) & n.PatternMap(flower1)).length
-  h["flower2 & flower1 "] = (n.PatternMap(flower2) & n.PatternMap(flower1)).length    
-  h=h.sort_by{|k,v| -v} 
-  h.each{|k,v| p k+v.to_s}
+  h["cat1"] = n.PatternMap(tmp)
+  h["cat2"] = n.PatternMap(tmp2)
+  h["cat3"] = n.PatternMap(cat3)
+  h["cat4"] = n.PatternMap(cat4)
+  h["human_1"] = n.PatternMap(tmp3)
+  h["human_2"] = n.PatternMap(tmp4)
+  h["human_3"] = n.PatternMap(human3)
+  h["human_4"] = n.PatternMap(human4)
+  h["flower1"] = n.PatternMap(flower1)
+  h["flower2"] = n.PatternMap(flower2)
+  
+  h.each do |k,v|
+    max = 0
+    tmp = nil
+    h.each do |k1,v1|
+      if k1!=k
+        if max < (v & v1).length
+          max = (v & v1).length
+          tmp = k1
+        end
+      end
+    end
+  p k + " best match "+ tmp.to_s + " with "+ max.to_s
+  end
 end
 
 def pngToArray(image)
@@ -112,5 +145,7 @@ def pngToArray(image)
 end
 #testFunc1
 p "Image test begin"
+t = Time.now
 imageTest
+p "time "+ (Time.now - t).to_s
 p "end image test"
