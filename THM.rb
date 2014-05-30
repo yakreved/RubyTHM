@@ -10,7 +10,7 @@ class Network
     @neurons_in_column = 2
     @columns = Array.new(20){Column.new}
     @desiredLocalActivity = 3          #Параметр контролирующий число колонок победителей после шага подавления. 
-
+    @t = 0 #Время int в начале каждого цикла инкрементим
   end
 
   def setColumnsCount(c)
@@ -119,7 +119,32 @@ class Network
     def Faza1(activeColumns)
       activeColumns.each do |c|
         predicted = false
+        lcChosen = false
+        c.neurons.map do |n|
+          if n.predictiveState
+            s = n.getActiveSegment
+            if s.sequenceSegment
+              predicted = true
+              n.activeState[@t] = 1
+              if n.learnStateActive(@t-1)
+                lcChosen = true
+                n.learnState[@t] = 1
+              end
+            end
+          end
+        end
         
+        if !predicted
+          c.neurons.map do |n|
+            n.activeState[@t] = 1
+          end
+        end
+        if lcChosen
+          neuron = c.getBestMatchingCell(@t-1)
+          neuron.learnState[@t] = 1
+          sUpdate = neuron.getSegmentActiveSynapses(@t-1)
+          sUpdate.sequenceSegment = true
+        end
       end
       
     end
